@@ -1,28 +1,21 @@
-import requests
+# 晴れる屋のメタゲームにアクセスして分布を取得するプログラム
 from bs4 import BeautifulSoup
+import requests
 
-# URLを設定
-url = "https://www.hareruyamtg.com/ja/deck/1/metagame/"
+url = "https://www.hareruyamtg.com/ja/deck/20/metagame/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+}
 
-# Webページにリクエストを送信
-response = requests.get(url)
+response = requests.get(url, headers=headers)
+html = response.text
 
-# レスポンスのステータスコードを確認
-if response.status_code == 200:
-    # レスポンスからHTMLを取得
-    html = response.content
+soup = BeautifulSoup(html, "html.parser")
 
-    # BeautifulSoupでHTMLを解析
-    soup = BeautifulSoup(html, "html.parser")
-
-    # 必要なデータを取得（例として、タイトルを取得）
-    title = soup.title.string
-    print(f"Title of the page: {title}")
-
-    # 特定のデータを取得（例として、特定のクラスを持つ要素を取得）
-    data = soup.find_all("div", {"class": "specific-class"})
-    for item in data:
-        print(item.text)
-
-else:
-    print(f"Failed to retrieve the web page. Status code: {response.status_code}")
+# デッキ情報を抽出
+decks = soup.find_all("li", class_="deckSearch-metaList__list__item")
+for deck in decks:
+    name = deck.find("span", class_="deckSearch-metaList__list__item__name").text
+    count = deck.find("span", class_="deckSearch-metaList__list__item__count").text
+    percent = deck.find("span", class_="deckSearch-metaList__list__item__percent").text
+    print(f"{name}、{count}、{percent}")
